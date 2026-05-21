@@ -1,0 +1,41 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  acrName: 'codealphaacr998877' 
+  rgName: 'CodeAlpha-RG-Final'
+  appName: 'codealpha-tetris-app-998877'
+
+steps:
+- task: AzureCLI@3
+  displayName: 'Build, Push, and Deploy to ACI'
+  inputs:
+    connectionType: 'azureRM'
+    azureSubscription: 'Azure subscription 1(325ab1de-478a-41d8-b114-91b589ef90da)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Logging into Azure Container Registry..."
+      az acr login --name $(acrName)
+      
+      echo "Building Docker Image..."
+      docker build -t $(acrName).azurecr.io/codealpha-tetris:$(Build.BuildId) .
+      docker tag $(acrName).azurecr.io/codealpha-tetris:$(Build.BuildId) $(acrName).azurecr.io/codealpha-tetris:latest
+      
+      echo "Pushing Image to ACR..."
+      docker push $(acrName).azurecr.io/codealpha-tetris:$(Build.BuildId)
+      docker push $(acrName).azurecr.io/codealpha-tetris:latest
+      
+      echo "Deploying update to Container Instance..."
+      az container create \
+        --resource-group $(rgName) \
+        --name $(appName) \
+        --image $(acrName).azurecr.io/codealpha-tetris:latest \
+        --registry-login-server $(acrName).azurecr.io \
+        --registry-username $(az acr credential show -n $(acrName) --query "username" -o tsv) \
+        --registry-password $(az acr credential show -n $(acrName) --query "passwords[0].value" -o tsv) \
+        --dns-name-label $(appName) \
+        --ports 80
