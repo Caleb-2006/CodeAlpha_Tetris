@@ -5,9 +5,9 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  acrName: 'codealphaacr998877' 
-  rgName: 'CodeAlpha-RG-Final'
-  appName: 'codealpha-tetris-app-998877'
+  acrName: 'codealphaacr556677' 
+  rgName: 'CodeAlpha-RG-V3'
+  appName: 'codealpha-tetris-app-556677'
 
 steps:
 - task: AzureCLI@3
