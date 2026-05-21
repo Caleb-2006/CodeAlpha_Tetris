@@ -38,4 +38,5 @@ steps:
         --registry-username $(az acr credential show -n $(acrName) --query "username" -o tsv) \
         --registry-password $(az acr credential show -n $(acrName) --query "passwords[0].value" -o tsv) \
         --dns-name-label $(appName) \
+        --os-type Linux \
         --ports 80
